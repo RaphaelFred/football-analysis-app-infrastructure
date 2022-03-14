@@ -4,13 +4,12 @@ Django==3.2.5
 django-cors-headers
 django-filter
 django-prometheus
-djangorestframework
+djangorestframework==3.13.1
 gunicorn
 mypy
 openpyxl
 pandas
 paramiko
-python-dateutil
 psycopg2-binary>=2.8,<3.0
 ptvsd
 python-dateutil
