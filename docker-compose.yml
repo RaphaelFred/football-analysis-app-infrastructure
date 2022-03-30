@@ -28,6 +28,18 @@ services:
     depends_on:
       - db
 
+  djangojobs:
+    volumes:
+      - static:/app/static
+      - ./football_analysis_app/:/app/
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile.jobs
+    depends_on:
+      - db
+    
   nginx:
     build: ./nginx
     volumes:
