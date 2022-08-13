@@ -26,7 +26,7 @@ services:
       context: .
     ports:
       - "8000:8000"
-    mem_limit: 256m
+    mem_limit: 800m
     depends_on:
       - db
 
@@ -41,7 +41,7 @@ services:
       dockerfile: Dockerfile.jobs
     depends_on:
       - db
-    mem_limit: 256m
+    mem_limit: 800m
     
   nginx:
     build: ./nginx
