@@ -19,12 +19,14 @@ services:
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
+      - ./Backups/:/app/Backups
     env_file:
       - .env
     build:
       context: .
     ports:
       - "8000:8000"
+    mem_limit: 256m
     depends_on:
       - db
 
@@ -39,6 +41,7 @@ services:
       dockerfile: Dockerfile.jobs
     depends_on:
       - db
+    mem_limit: 256m
     
   nginx:
     build: ./nginx
