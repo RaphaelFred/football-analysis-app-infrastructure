@@ -16,41 +16,41 @@ services:
     container_name: postgres_db
 
   web:
+    image: fred031/football-app:app_0.0.1
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
       - ./Backups/:/app/Backups
     env_file:
       - .env
-    build:
-      context: .
     ports:
       - "8000:8000"
-    mem_limit: 800m
     depends_on:
       - db
+    restart: always
 
   djangojobs:
+    image: fred031/football-app:jobs_0.0.1
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
     env_file:
       - .env
-    build:
-      context: .
-      dockerfile: Dockerfile.jobs
     depends_on:
       - db
     mem_limit: 800m
+    restart: always
     
   nginx:
-    build: ./nginx
+    image: football-analysis-app-infrastructure_nginx
     volumes:
       - static:/app/static
     ports:
       - "80:80"
     depends_on:
       - web
+    
+    
 
 volumes:
   static:
