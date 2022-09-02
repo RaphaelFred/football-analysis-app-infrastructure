@@ -16,7 +16,8 @@ services:
     container_name: postgres_db
 
   web:
-    image: fred031/football-app:app_0.0.1
+    build:
+       context: .
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
@@ -30,7 +31,9 @@ services:
     restart: always
 
   djangojobs:
-    image: fred031/football-app:jobs_0.0.1
+    build:
+       context: .
+       dockerfile: Dockerfile.jobs
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
@@ -42,7 +45,7 @@ services:
     restart: always
     
   nginx:
-    image: football-analysis-app-infrastructure_nginx
+    build: ./nginx
     volumes:
       - static:/app/static
     ports:
