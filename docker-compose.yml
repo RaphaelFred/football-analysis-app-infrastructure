@@ -26,6 +26,8 @@ services:
       - .env
     ports:
       - "8000:8000"
+    mem_limit: 800m
+    cpus: 0.5
     depends_on:
       - db
     restart: always
@@ -42,6 +44,7 @@ services:
     depends_on:
       - db
     mem_limit: 800m
+    cpus: 0.75
     restart: always
     
   nginx:
