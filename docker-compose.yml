@@ -14,6 +14,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     container_name: postgres_db
+    networks:
+      - football
 
   web:
     build:
@@ -31,6 +33,8 @@ services:
     depends_on:
       - db
     restart: always
+    networks:
+      - football
 
   djangojobs:
     build:
@@ -55,8 +59,23 @@ services:
       - "80:80"
     depends_on:
       - web
+    networks:
+      - football
     
-    
+  datascience-notebook:
+    image: jupyter-notebook
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.jupyter
+    volumes:
+      - ./jupyter-notebooks:/home/jovyvan/work
+    ports:
+      - 8888:8888
+    environment:
+      - JUPYTER_TOKEN=ADMIN
+    container_name: datascience-notebook-container
+    networks:
+      - football
 
 volumes:
   static:
@@ -67,4 +86,6 @@ volumes:
   pglog:
     driver: local
 
-
+networks:
+  football:
+    name: football 

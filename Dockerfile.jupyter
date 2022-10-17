@@ -1,0 +1,10 @@
+FROM jupyter/datascience-notebook:python-3.10.5
+USER root
+ENV GRANT_SUDO=yes
+RUN apt-get update
+RUN apt-get -y install libpq-dev gcc
+
+USER $NB_UID
+
+RUN pip install mlflow==1.26.0 xgboost==1.6.1
+RUN pip install psycopg2
