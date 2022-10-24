@@ -2,18 +2,18 @@ version: '3.7'
 
 services:
   db:
-    image: postgres
+    image: postgres:14
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - pgconf:/etc/postgresql
-      - pglog:/var/log/postgresql
+      - ./create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgres-databases.sh
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    container_name: postgres_db
+      # - POSTGRES_DB=postgres
+      - POSTGRES_USER=football
+      - POSTGRES_PASSWORD=football
+      - POSTGRES_MULTIPLE_DATABASES=app,mlflow
+    # container_name: postgres_db
     networks:
       - football
 
@@ -24,6 +24,7 @@ services:
       - static:/app/static
       - ./football_analysis_app/:/app/
       - ./Backups/:/app/Backups
+      - mlflow-artifact-store:/opt/mlflow/mlruns
     env_file:
       - .env
     ports:
@@ -32,6 +33,8 @@ services:
     cpus: 0.5
     depends_on:
       - db
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
     restart: always
     networks:
       - football
@@ -43,6 +46,7 @@ services:
     volumes:
       - static:/app/static
       - ./football_analysis_app/:/app/
+      - mlflow-artifact-store:/opt/mlflow/mlruns
     env_file:
       - .env
     depends_on:
@@ -50,6 +54,8 @@ services:
     mem_limit: 800m
     cpus: 0.75
     restart: always
+    networks:
+      - football
     
   nginx:
     build: ./nginx
@@ -61,6 +67,19 @@ services:
       - web
     networks:
       - football
+
+  mlflow-tracking-service:
+    depends_on:
+      - web
+    environment:
+      - MLFLOW_TRACKING_URI=postgresql://football:football@db:5432/mlflow
+    image: mlflow-tracking-server
+    networks:
+      - football
+    ports:
+      - 5000:5000
+    volumes:
+      - mlflow-artifact-store:/opt/mlflow/mlruns
     
   datascience-notebook:
     image: jupyter-notebook
@@ -68,12 +87,13 @@ services:
     #  context: .
     #  dockerfile: Dockerfile.jupyter
     volumes:
-      - ./jupyter-notebooks:/home/jovyvan/work
+      - ./jupyter-notebooks:/home/jovyan/work
+      - mlflow-artifact-store:/opt/mlflow/mlruns
     ports:
       - 8888:8888
     environment:
       - JUPYTER_TOKEN=ADMIN
-    container_name: datascience-notebook-container
+      - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
     networks:
       - football
 
@@ -81,9 +101,7 @@ volumes:
   static:
   pgdata:
     driver: local
-  pgconf:
-    driver: local
-  pglog:
+  mlflow-artifact-store:
     driver: local
 
 networks:

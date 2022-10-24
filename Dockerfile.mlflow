@@ -1,0 +1,32 @@
+FROM python:3.9
+ 
+ENV MLFLOW_HOME /opt/mlflow
+ENV MLFLOW_SERVER_PORT 5000
+ENV MLFLOW_SERVER_HOST 0.0.0.0
+ENV ARTIFACT_STORE ${MLFLOW_HOME}/mlruns
+ 
+RUN apt-get update && apt-get install -y netcat
+ 
+RUN pip install sklearn h2o==3.34.0.3 mlflow==1.21.0 psycopg2==2.9.2 protobuf==3.19.4 && \
+    mkdir -p ${MLFLOW_HOME}/scripts && \
+    mkdir -p ${ARTIFACT_STORE}
+ 
+COPY container-config/mlflow-tracking-server/entrypoint.sh ${MLFLOW_HOME}/scripts/entrypoint.sh
+RUN apt-get update && \
+    apt-get install dos2unix
+RUN dos2unix ${MLFLOW_HOME}/scripts/entrypoint.sh
+RUN chmod +x ${MLFLOW_HOME}/scripts/entrypoint.sh
+ 
+EXPOSE ${MLFLOW_SERVER_PORT}/tcp
+ 
+VOLUME ["${MLFLOW_HOME}/scripts/", "${ARTIFACT_STORE}"]
+ 
+WORKDIR ${MLFLOW_HOME}
+ 
+RUN addgroup --system --gid 1000 app && adduser --system --uid 1000 --ingroup app app
+RUN chown app ${MLFLOW_HOME}
+RUN chgrp app ${MLFLOW_HOME}
+USER app
+
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]

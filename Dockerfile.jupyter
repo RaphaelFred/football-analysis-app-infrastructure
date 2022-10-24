@@ -1,3 +1,4 @@
+# FROM jupyter/scipy-notebook
 FROM jupyter/datascience-notebook:python-3.10.5
 USER root
 ENV GRANT_SUDO=yes
