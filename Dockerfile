@@ -1,4 +1,4 @@
-FROM python:3.9.7-slim-bullseye
+FROM python:3.9.7-bullseye
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -12,7 +12,8 @@ COPY ./requirements.txt .
 RUN pip install --upgrade pip
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 RUN pip install --no-cache /app/wheels/*
-RUN pip install flake8
+# RUN pip install -r requirements.txt
+RUN pip install flake8 psycopg2-binary
 
 COPY ./football_analysis_app /app
 

@@ -20,10 +20,11 @@ services:
   web:
     build:
        context: .
+       dockerfile: Dockerfile
     volumes:
       - static:/app/static
-      - football_analysis_app:/app/
-      - Backups:/app/Backups
+      - ./football_analysis_app:/app/
+      - ./Backups:/app/Backups
       - mlflow-artifact-store:/opt/mlflow/mlruns
     env_file:
       - .env
@@ -45,7 +46,7 @@ services:
        dockerfile: Dockerfile.jobs
     volumes:
       - static:/app/static
-      - football_analysis_app:/app/
+      - ./football_analysis_app:/app/
       - mlflow-artifact-store:/opt/mlflow/mlruns
     env_file:
       - .env
@@ -80,6 +81,8 @@ services:
       - 5000:5000
     volumes:
       - mlflow-artifact-store:/opt/mlflow/mlruns
+    profiles:
+      - ml
 
   datascience-notebook:
     image: jupyter-notebook
@@ -96,6 +99,8 @@ services:
       - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
     networks:
       - football
+    profiles:
+      - ml
 
 volumes:
   static:
@@ -105,7 +110,6 @@ volumes:
     driver: local
   football_analysis_app:
     driver: local
-  Backups:
 
 networks:
   football:
