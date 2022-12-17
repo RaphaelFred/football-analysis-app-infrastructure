@@ -36,6 +36,8 @@ services:
       - db
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
+      - POSTGRES_USER=football
+      - POSTGRES_PASSWORD=football
     restart: always
     networks:
       - football
