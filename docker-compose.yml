@@ -41,11 +41,12 @@ services:
     restart: always
     networks:
       - football
-
-  djangojobs:
+    command: ["sh", "/entrypoint.sh"]
+  
+  dailyjobs:
     build:
        context: .
-       dockerfile: Dockerfile.jobs
+       dockerfile: Dockerfile
     volumes:
       - static:/app/static
       - ./football_analysis_app:/app/
@@ -54,6 +55,26 @@ services:
       - .env
     depends_on:
       - db
+    command: ["python", "jobs/daily_job.py"]
+    mem_limit: 800m
+    cpus: 0.75
+    restart: always
+    networks:
+      - football
+
+  importjobs:
+    build:
+       context: .
+       dockerfile: Dockerfile
+    volumes:
+      - static:/app/static
+      - ./football_analysis_app:/app/
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: ["python", "jobs/import_job.py"]
     mem_limit: 800m
     cpus: 0.75
     restart: always
