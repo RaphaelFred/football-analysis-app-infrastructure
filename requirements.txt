@@ -10,7 +10,6 @@ mypy
 openpyxl
 pandas
 paramiko
-psycopg2-binary>=2.8,<3.0
 ptvsd
 python-dateutil
 pyyaml

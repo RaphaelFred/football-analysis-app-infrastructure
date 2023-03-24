@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   db:
-    image: postgres:14
+    image: arm64v8/postgres:14
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgres-databases.sh
@@ -18,7 +18,7 @@ services:
   web:
     build:
        context: .
-       dockerfile: Dockerfile
+       dockerfile: Dockerfile.arm
     volumes:
       - static:/app/static
       - ./football_analysis_app:/app/
@@ -44,7 +44,7 @@ services:
   dailyjobs:
     build:
        context: .
-       dockerfile: Dockerfile
+       dockerfile: Dockerfile.arm
     volumes:
       - static:/app/static
       - ./football_analysis_app:/app/
@@ -63,7 +63,7 @@ services:
   importjobs:
     build:
        context: .
-       dockerfile: Dockerfile
+       dockerfile: Dockerfile.arm
     volumes:
       - static:/app/static
       - ./football_analysis_app:/app/
@@ -80,7 +80,7 @@ services:
       - football
 
   nginx:
-    build: ./nginx
+    build: ./nginx/arm
     volumes:
       - static:/app/static
     ports:
