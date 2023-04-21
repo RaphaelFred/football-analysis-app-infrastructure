@@ -8,4 +8,4 @@ python manage.py collectstatic --noinput
 echo "Apply database migrations"
 python manage.py migrate
 
-gunicorn football_analysis_app.wsgi:application --bin 0.0.0.0:8000
+gunicorn football_analysis_app.wsgi:application --bind 0.0.0.0:8000
