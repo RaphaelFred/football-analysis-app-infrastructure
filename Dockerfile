@@ -18,4 +18,3 @@ RUN pip install flake8 psycopg2-binary
 WORKDIR /app
 
 COPY ./entrypoint.sh /
-ENTRYPOINT ["sh", "/entrypoint.sh"]

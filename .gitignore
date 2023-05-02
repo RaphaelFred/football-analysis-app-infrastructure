@@ -3,3 +3,4 @@ Backups
 backup.sql
 backup_
 */mlruns
+.env
