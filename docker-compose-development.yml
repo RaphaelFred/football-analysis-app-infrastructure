@@ -12,6 +12,8 @@ services:
       - POSTGRES_MULTIPLE_DATABASES=app,mlflow
     networks:
       - football
+    ports:
+      - 5432:5432 
   
   web:
     build:
@@ -25,6 +27,8 @@ services:
     env_file:
       - .env
     mem_limit: 800m
+    ports:
+      - 8000:8000
     cpus: 0.5
     depends_on:
       - db
