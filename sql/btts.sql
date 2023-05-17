@@ -77,6 +77,7 @@ WITH BTTS AS (
         btts.away_team_points,
         fix.goals_home,
         fix.goals_away,
+        CASE WHEN odd is null then 0 else profit_loss_all END AS profit_loss_all,
         CASE WHEN fix.goals_home > 0 AND fix.goals_away > 0 THEN 1 ELSE 0 END AS SUCCESS
 
     FROM public.module1_btts btts
@@ -86,14 +87,14 @@ WITH BTTS AS (
 )
 SELECT
     EXTRACT('year' FROM btts.fixture_timestamp_utc) AS YEAR,
-    COUNTRY,
     LEAGUE_NAME,
     CAST(SUM(SUCCESS) as float) AS NUM_SUCCESSES,
     CAST(COUNT(btts.FIXTURE_ID) as float) AS NUM_FIXTURES,
+    SUM(profit_loss_all) AS PROFIT,
     CAST(SUM(SUCCESS) AS FLOAT)/COUNT(btts.FIXTURE_ID) AS SUCCESS_RATIO
 FROM BTTS
 GROUP BY
-    1, 2, 3
+    1, 2
 ORDER BY 
-     2, 3, 1
+     2, 1
 ;

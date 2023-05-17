@@ -65,6 +65,10 @@ WITH OVER25 AS (
         away_team_name,
         goals_home,
         goals_away,
+        CASE
+                    WHEN btts.odd IS NULL THEN 0::numeric
+                    ELSE btts.profit_loss_all
+                END AS profit_loss_all,
         CASE WHEN (goals_home + goals_away) > 2  THEN 1 ELSE 0 END AS SUCCESS
     FROM public.module1_over25
     ORDER BY FIXTURE_TIMESTAMP_UTC
