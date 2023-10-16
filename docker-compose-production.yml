@@ -7,8 +7,8 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgres-databases.sh
     environment:
-      - POSTGRES_USER=football
-      - POSTGRES_PASSWORD=football
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
       - POSTGRES_MULTIPLE_DATABASES=app,mlflow
     networks:
       - football
@@ -97,35 +97,9 @@ services:
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-  mlflow-tracking-service:
-    depends_on:
-      - web
-    environment:
-      - MLFLOW_TRACKING_URI=postgresql://football:football@db:5432/mlflow
-    image: mlflow-tracking-server
-    networks:
-      - football
-    ports:
-      - 5000:5000
-    volumes:
-      - mlflow-artifact-store:/opt/mlflow/mlruns
-    profiles:
-      - ml
 
-  datascience-notebook:
-    image: jupyter-notebook
-    volumes:
-      - ./jupyter-notebooks:/home/jovyan/work
-      - mlflow-artifact-store:/opt/mlflow/mlruns
-    ports:
-      - 8888:8888
-    environment:
-      - JUPYTER_TOKEN=ADMIN
-      - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
-    networks:
-      - football
-    profiles:
-      - ml
+
+
 
 volumes:
   static:

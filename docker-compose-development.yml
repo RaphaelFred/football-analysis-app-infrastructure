@@ -7,8 +7,8 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgres-databases.sh
     environment:
-      - POSTGRES_USER=football
-      - POSTGRES_PASSWORD=football
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
       - POSTGRES_MULTIPLE_DATABASES=app,mlflow
     networks:
       - football
@@ -27,15 +27,13 @@ services:
     env_file:
       - .env
     mem_limit: 800m
-    ports:
-      - 8000:8000
     cpus: 0.5
     depends_on:
       - db
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
-      - POSTGRES_USER=football
-      - POSTGRES_PASSWORD=football
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
     restart: always
     networks:
       - football
@@ -85,6 +83,7 @@ services:
       - static:/app/static
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+      - ./data/ssl:/etc/nginx/certs
     ports:
       - "80:80"
       - "443:443"
