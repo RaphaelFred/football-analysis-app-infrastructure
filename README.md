@@ -28,5 +28,8 @@ Create signature
 ### Chrome: TODO
 
 
-
+### STeps for Production
++ Clone Repo for football-analysis-app-infrastructure
++ Clone Repo django-football-app inside infrastructure folder
++ Rename to football_analysis_app 
 
