@@ -1,0 +1,144 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgres-databases.sh
+    environment:
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=app,mlflow
+    networks:
+      - football
+    ports:
+      - 5432:5432 
+  
+  web:
+    build:
+       context: .
+       dockerfile: Dockerfile
+    volumes:
+      - static:/app/static
+      - ./football_analysis_app:/app/
+      - ./Backups:/app/Backups
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    env_file:
+      - .env
+    mem_limit: 800m
+    cpus: 0.5
+    depends_on:
+      - db
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
+    restart: always
+    networks:
+      - football
+    command: ["sh", "/entrypoint.sh"]
+  
+  dailyjobs:
+    build:
+       context: .
+       dockerfile: Dockerfile
+    volumes:
+      - static:/app/static
+      - ./football_analysis_app:/app/
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: ["python", "jobs/daily_job.py"]
+    mem_limit: 800m
+    cpus: 0.75
+    restart: always
+    networks:
+      - football
+
+  importjobs:
+    build:
+       context: .
+       dockerfile: Dockerfile
+    volumes:
+      - static:/app/static
+      - ./football_analysis_app:/app/
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: ["python", "jobs/import_job.py"]
+    mem_limit: 800m
+    cpus: 0.75
+    restart: always
+    networks:
+      - football
+
+  nginx:
+    build: ./nginx/integration
+    volumes:
+      - static:/app/static
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+      - ./data/ssl:/etc/nginx/certs
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    networks:
+      - football
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  
+  # certbot:
+  #   image: certbot/certbot
+  #   volumes:
+  #     - ./data/certbot/conf:/etc/letsencrypt
+  #     - ./data/certbot/www:/var/www/certbot
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  mlflow-tracking-service:
+    depends_on:
+      - web
+    environment:
+      - MLFLOW_TRACKING_URI=postgresql://football:football@db:5432/mlflow
+    image: mlflow-tracking-server
+    networks:
+      - football
+    ports:
+      - 5000:5000
+    volumes:
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    profiles:
+      - ml
+
+  datascience-notebook:
+    image: jupyter-notebook
+    volumes:
+      - ./jupyter-notebooks:/home/jovyan/work
+      - mlflow-artifact-store:/opt/mlflow/mlruns
+    ports:
+      - 8888:8888
+    environment:
+      - JUPYTER_TOKEN=ADMIN
+      - MLFLOW_TRACKING_URI=http://mlflow-tracking-service:5000
+    networks:
+      - football
+    profiles:
+      - ml
+
+volumes:
+  static:
+  pgdata:
+    driver: local
+  mlflow-artifact-store:
+    driver: local
+  football_analysis_app:
+    driver: local
+
+networks:
+  football:
+    name: football
